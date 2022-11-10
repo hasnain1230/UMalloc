@@ -9,7 +9,7 @@ on the directions of this assignment.
 
 # Authors
 - Hasnain Ali
-- Carolette Saguil
+- <Names Here>
 
 # Pre-Requisites
 This library (and it's corresponding programs) were only intended to be executed on `x86` and `x86_64` architectures. This library and programs
