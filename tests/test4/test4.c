@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../src/mymalloc.h"
+#include "../../src/umalloc.h"
 
 //same as test 1 but expect seg fault error because trying to access something you already freed
 

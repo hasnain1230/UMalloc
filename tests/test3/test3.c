@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../../src/mymalloc.h"
+#include "../../src/umalloc.h"
 
 //same as test 1 but expect double free error because free array twice at bottom
 

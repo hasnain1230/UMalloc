@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../../src/mymalloc.h"
+#include "../../src/umalloc.h"
 
 //test1 will get the number of elements from input and print out the elements of the array, which will be 1 to number of elements in array
 //e.g. if there are 5 elements in the array, the elements in the array will be 1,2,3,4,5

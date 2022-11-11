@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "errors.h"
-#include "mymalloc.h"
+#include "umalloc.h"
 
 /*
  * These represent the ASCII values of 'T' and 'F' respectively. These are used to represent true and false respectively.
@@ -40,7 +40,7 @@ void printMemory(int bytes) { // This function was created for debugging purpose
     }
     for (int x = 0; x < bytes; x++) {
         printf("Address %d: %p\n", x, memory + x);
-        printf("Value: %d\n", memory[x]);
+        printf("Value: %x\n", memory[x]);
     }
 }
 
@@ -79,7 +79,7 @@ void coalesceBlocks() {
 
         int nextMDLocation = x + sizeof(struct metaData) + firstMetaData->dataSize; // The location of the next metaData in the array.
 
-        if (nextMDLocation + 8 > MEMSIZE) { // If we are at the last piece of metaData and there is nothing else to the right. Nothing to allocate.
+        if (nextMDLocation + sizeof(struct metaData) > MEMSIZE) { // If we are at the last piece of metaData and there is nothing else to the right. Nothing to allocate.
             return;
         }
 
@@ -87,6 +87,7 @@ void coalesceBlocks() {
 
         if (firstMetaData->available == TRUE && secondMetaData->available == TRUE) {
             firstMetaData->dataSize += (secondMetaData->dataSize + sizeof(struct metaData)); // Combine the two blocks, the data they have allocated, and one of their metaDatas.
+            continue;
         }
 
         x += sizeof(struct metaData) + firstMetaData->dataSize; // Iterate through array based on metaData.
@@ -101,7 +102,7 @@ void coalesceBlocks() {
  * how CALLABLE memory the user has left. Please see README for more details.
  */
 
-void *mymalloc(size_t size, char *file, int line) {
+void *umalloc(size_t size, char *file, int line) {
     if (size + (2 * sizeof(struct metaData)) > MEMSIZE) { // If the user physically calls too much memory.
         tooMuchMem(MEMSIZE, file, line);
         return NULL;
@@ -158,7 +159,7 @@ void *mymalloc(size_t size, char *file, int line) {
  * to combine any two adjacent free blocks.
  */
 
-void myfree(void *ptr, char *file, int line) {
+void ufree(void *ptr, char *file, int line) {
     if (ptr == NULL) {
         nullPointerPassed(file, line);
         exit(1);

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../src/mymalloc.h"
+#include "../../src/umalloc.h"
 
 //same as test 1 but expect wrong pointer error because it's trying to free something that's not pointing to the address of the 0th part of what we malloced
 
