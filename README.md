@@ -39,7 +39,7 @@ Our test plan includes a series of stress tests that will trigger almost all the
 
 ### Errors
 
-```asm
+```c
 void doubleFree(char* file, int line);
 void wrongPointer(char* file, int line);
 void tooMuchMem(int MEMSIZE, char* file, int line);
@@ -187,7 +187,7 @@ in case something goes wrong. C does not have such a feature built into any of i
 ### Documentation and Design Properties of `MyMalloc.h`
 
 `mymalloc.h` provides function prototypes for these functions that are later defined in `mymalloc.c` These prototypes can be seen below:
-```asm
+```c
 void *mymalloc(size_t size, char *file, int line);
 void myfree(void *ptr, char *file, int line);
 void freeAll();

@@ -5,10 +5,10 @@ CFLAGS = -g -std=c99 -Wall -Wvla -Werror -Wundef -Wpointer-arith -fsanitize=addr
 $(TARGET): $(TARGET).o mymalloc.o errors.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(TARGET).o: $(TARGET).c ../../src/mymalloc.h
+$(TARGET).o: $(TARGET).c ../../src/umalloc.h
 	$(CC) -c $(CFLAGS) $<
 
-mymalloc.o: ../../src/mymalloc.c ../../src/mymalloc.h
+mymalloc.o: ../../src/umalloc.c ../../src/umalloc.h
 	$(CC) -c $(CFLAGS) $<
 
 errors.o: ../../src/errors.c ../../src/errors.h

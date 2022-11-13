@@ -1,7 +1,7 @@
-TARGET = memgrind
+TARGET = test
 CC = gcc
-CFLAGS = -g -std=c99 -Wall -Wvla -Werror -Wextra -Wundef -Wshadow -Wpointer-arith -O2 -fsanitize=address
-OBJ = mymalloc.o $(TARGET).o errors.o
+CFLAGS = -g -std=c99 -Wall -Wvla -Wextra -Wundef -Wshadow -Wpointer-arith -O3 -fsanitize=address
+OBJ = umalloc.o $(TARGET).o errors.o
 
 all: $(TARGET)
 
@@ -11,10 +11,10 @@ run: $(TARGET)
 $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(TARGET).o: $(TARGET).c mymalloc.h
+$(TARGET).o: $(TARGET).c umalloc.h
 	$(CC) -c $(CFLAGS) $<
 
-mymalloc.o: mymalloc.c mymalloc.h
+umalloc.o: umalloc.c umalloc.h
 	$(CC) -c $(CFLAGS) $<
 
 errors.o: errors.c errors.h
