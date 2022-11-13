@@ -6,23 +6,7 @@
 
 #include "umalloc.h"
 
-struct metaData {
-    char available; // In this case, available will either be set as T or F for true or false.
-    unsigned short dataSize; // We did not use size_t here to save space in the long run. Rather than having a 16 byte alignment, doing unsigned int makes it 8 byte aligned which will save space. I think it is safe to assume that the user will not be allocating more than 4 GB of memory all at once should the memory be 2^32 bytes large.
-};
 
 int main(void) {
-    int *p = malloc(1000);
-    int *q = malloc(1000);
-    int *r = malloc(1000);
-    int *s = malloc(1000);
 
-    free(p);
-    free(r);
-    free(s);
-    free(q);
-
-
-
-    printMemory(4096);
 }

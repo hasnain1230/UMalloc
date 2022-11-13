@@ -61,7 +61,6 @@ void *initializeMemory(size_t size) {
     md = (struct metaData *) &memory[sizeof(struct metaData) + md->dataSize]; // Have md point to basically after the metadata and allocated memory given to the user.
 
     md->available = TRUE;
-    // Seriously, 3 meta data is okay on the first time around.
     md->dataSize = MEMSIZE - (sizeof(struct metaData) * 3) - size; // How much memory there is left to allocate. Here, we are accounting for three metaData structs. The one made by user, the one storing how much data is left over, and space for the next metaData that will be stored on the next malloc call.
 
     return memory + sizeof(struct metaData); // Return pointer to first allocated memory.
@@ -104,22 +103,14 @@ void coalesceBlocks() {
  */
 
 void *umalloc(size_t size, char *file, int line) {
-    if (memory[0] == 0) { // Initialize the memory.
-        if ((sizeof(struct metaData) * 3) + size > MEMSIZE) { // If the user is trying to allocate more than the entire memory array, return NULL.
-            tooMuchMem(file, line, sizeof(struct metaData));
-            return NULL;
-        }
-        return initializeMemory(size); // This function was made because I wanted to keep initializeMemory code separate from everything else.
-    }
-
-    if (size + (2 * sizeof(struct metaData)) > MEMSIZE) { // If the user physically calls too much memory.
-        tooMuchMem(MEMSIZE, file, line);
+    if ((sizeof(struct metaData) * 2) + size > MEMSIZE) { // If the user is trying to allocate more than the entire memory array, return NULL.
+        tooMuchMem(MEMSIZE, file, line, sizeof(struct metaData));
         return NULL;
-    }
-
-    if (size <= 0) {
+    } else if (size <= 0) {
         mallocZeroError(file, line); // The user is not allowed to call zero or fewer bytes. Doing so causes issues; real malloc allows for this, but we do not.
         return NULL;
+    } else if (memory[0] == 0) { // Initialize the memory.
+        return initializeMemory(size); // This function was made because I wanted to keep initializeMemory code separate from everything else.
     }
 
     int x = 0;
@@ -128,17 +119,22 @@ void *umalloc(size_t size, char *file, int line) {
         struct metaData *md = (struct metaData *) &memory[x];
 
         if (md->available == TRUE && md->dataSize >= size) { // Found a block big enough.
-            md->available = FALSE;
+            // unsigned int nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
+
+            // FIXME: Ask Professor: Do we need to memmove? This makes fragmentation a little harder.
+            // FIXME: Clean up the code around here. It is a little messy.
+            memmove(&memory[x + sizeof(struct metaData) + size], &memory[x + sizeof(struct metaData) + md->dataSize], MEMSIZE - (x + sizeof(struct metaData) + md->dataSize)); // Move the rest of the memory to the right to make room for the next metaData.
+
             md->dataSize = size;
+            md->available = FALSE;
 
             unsigned int nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
-
             md = (struct metaData *) &memory[nextMDIndex]; // The next metaData that is or may need to be stored to the right of this currently allocated chunk.
 
-            if (md->available != TRUE && md->available != FALSE) { // This means that there is no metaData to the right, and we need to allocate it. If there is metaData to the right, we do not need to worry about.
+            if (md->available != TRUE && md->available != FALSE && md->available == 0) { // This means that there is no metaData to the right, and we need to allocate it. If there is metaData to the right, we do not need to worry about.
                 if (nextMDIndex + sizeof(struct metaData) <= MEMSIZE) { // If there is actually enough space to store this new metaData
                     md->available = TRUE;
-                    md->dataSize = MEMSIZE - (x + (3 * sizeof(struct metaData)) + size); // How much memory there is left to allocate. Here, we are accounting for three metaData structs. The one made by user, the one storing how much data is left over, and space for the next metaData that will be stored on the next malloc call.
+                    md->dataSize = MEMSIZE - (x + (2 * sizeof(struct metaData)) + size); // How much memory there is left to allocate. Here, we are accounting for three metaData structs. The one made by user, the one storing how much data is left over, and space for the next metaData that will be stored on the next malloc call.
                 } else {
                     noMoreMem(file, line);
                     return NULL;

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "errors.h"
 
-void doubleFree(char* file, int line){//trying to free something you already freed
+void doubleFree(char* file, int line) { //trying to free something you already freed
     printf("You cannot free something twice. [ %s:%d ]\n", file, line);
     return;
 }
