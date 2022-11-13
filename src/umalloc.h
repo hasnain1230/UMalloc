@@ -1,7 +1,7 @@
 #ifndef _UMALLOC_H
 #define _UMALLOC_H
 
-#define MEMSIZE 4096 // (1024 * 1024 * 10)
+#define MEMSIZE (1024 * 1024 * 10)
 
 #define malloc(s) umalloc(s, __FILE__, __LINE__)
 #define free(p) ufree(p, __FILE__, __LINE__)
