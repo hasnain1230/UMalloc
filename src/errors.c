@@ -11,8 +11,8 @@ void wrongPointer(char* file, int line){ //client not giving right pointer to fr
     return;
 }
 
-void tooMuchMem(int MEMSIZE, char* file, int line){ //client requesting more than MEMSIZE. Also, this error will only be printed on the first call to malloc, before memory is initialized!
-    printf("You are requesting too much memory. You can request at most %d bytes. [ %s:%d ]\n", (MEMSIZE - 16), file, line); // We are subtracting 16 because on the FIRST call to malloc, two meta-data structs are made, leaving the user with MEMSIZE - 16 bytes left to allocate.
+void tooMuchMem(int MEMSIZE, char* file, int line, size_t structSize) { //client requesting more than MEMSIZE. Also, this error will only be printed on the first call to malloc, before memory is initialized!
+    printf("You are requesting too much memory. You can request at most %lu bytes. [ %s:%d ]\n", (MEMSIZE - (structSize * 2)), file, line); // We are subtracting 16 because on the FIRST call to malloc, two meta-data structs are made, leaving the user with MEMSIZE - 16 bytes left to allocate.
     return;
 }
 

@@ -12,5 +12,17 @@ struct metaData {
 };
 
 int main(void) {
-    int *p = malloc(4096);
+    int *p = malloc(1000);
+    int *q = malloc(1000);
+    int *r = malloc(1000);
+    int *s = malloc(1000);
+
+    free(p);
+    free(r);
+    free(s);
+    free(q);
+
+
+
+    printMemory(4096);
 }
