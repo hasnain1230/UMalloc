@@ -103,7 +103,7 @@ void coalesceBlocks() {
  */
 
 void *umalloc(size_t size, char *file, int line) {
-    if ((sizeof(struct metaData) * 2) + size > MEMSIZE) { // If the user is trying to allocate more than the entire memory array, return NULL.
+    if ((size + (sizeof(struct metaData) * 2)) > MEMSIZE) { // If the user is trying to allocate more than the entire memory array, return NULL.
         tooMuchMem(MEMSIZE, file, line, sizeof(struct metaData));
         return NULL;
     } else if (size <= 0) {
