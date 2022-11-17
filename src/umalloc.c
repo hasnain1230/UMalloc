@@ -104,7 +104,7 @@ void coalesceBlocks() {
 
 void *umalloc(size_t size, char *file, int line) {
     if ((size + (sizeof(struct metaData) * 2)) > MEMSIZE) { // If the user is trying to allocate more than the entire memory array, return NULL.
-        tooMuchMem(MEMSIZE, file, line, sizeof(struct metaData));
+        //tooMuchMem(MEMSIZE, file, line, sizeof(struct metaData));
         return NULL;
     } else if (size <= 0) {
         mallocZeroError(file, line); // The user is not allowed to call zero or fewer bytes. Doing so causes issues; real malloc allows for this, but we do not.
