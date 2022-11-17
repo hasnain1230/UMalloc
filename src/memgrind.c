@@ -10,203 +10,146 @@ void unusedFunction(char **arr) { // This is done to supress unused variable err
 }
 
 int main() {
-    srand(time(0));
+
+    /*0. Consistency:
+            allocate a small block (1 to 10B), cast it to a type, write to it, free it
+            allocate a block of the same size, cast it to the same type, then check to see if the address of the pointers are the same*/
     
-    struct timeval start, end;
+    printf("===================================================================================\nTest 0\n");
 
-    // Test 1: Malloc and immediately free a 1 byte chunk 120 times. Repeat this 50 times.
-    // ============================================================================================================
-    gettimeofday(&start, NULL);
+    int *test1 = malloc(4);
+    ((char *)test1)[0] = 'h';
+    ((char *)test1)[1] = 'i';
+    ((char *)test1)[2] = '!';
+    ((char *)test1)[3] = '\0';
 
-    for(int i = 0; i<50; i++){ 
-        for (int j = 0; j<120; j++){
-            char *c = malloc(1);
+    char *test2 = malloc(4);
+    ((char *)test2)[0] = 'h';
+    ((char *)test2)[1] = 'i';
+    ((char *)test2)[2] = '!';
+    ((char *)test2)[3] = '\0';
+    
+    // printf("%s\n", (char *)test1);
+    // printf("%s\n", (char *)test2);
+    printf("Address of test1 : %p\n", &test1);
+    printf("Address of test2 : %p\n", &test2);
 
-            if (c == NULL) {
-                perror("Malloc Returned NULL. Please see error message above. Program is exiting...");
-                exit(1);
-            }
+    free(test1);
+    free(test2);
+    freeAll();
+    
+    /* 1. Maximization:
+            allocate 1B, if the result is not NULL, free it, double the size and try again
+            on NULL, halve the size and try again
+            if NULL and size is 1 or 0, that is your maximal allocation
+            free it*/
+    
+    printf("===================================================================================\nTest 1\n");
 
-            free(c);
+    char *p;
+    int allocated = 0;
+    int size = 1;
+    
+
+    p = malloc(size);
+    allocated = allocated + size;
+
+    while(p != NULL){
+        free(p);
+        size = size*2;
+        // printf("size: %d\n", size);
+        p = malloc(size);
+        allocated = allocated + size;
+        // printf("allocated = %d\n", allocated);
+    }
+
+    //not sure if this is right, but once you hit NULL, then keep dividing the size
+
+    while(1){
+        size = size/2;
+        if(size == 0 || size == 1){
+            allocated = allocated + size;
+            break;
+        }else{
+            // printf("size: %d\n", size);
+            p = malloc(size);
+            allocated = allocated + size;
+            free(p);
         }
     }
 
-    gettimeofday(&end, NULL);
+    printf("allocated: %d\n", allocated);
+    freeAll();
 
-    long double averageTimeTaken = (((long double) end.tv_usec) - ((long double) start.tv_usec)) / 50.0;
+    /* 2. Basic Coalescence:
+            allocate one half of your maximal allocation (see test 1)
+            allocate one quarter of your maximal allocation
+            free the first pointer
+            free the second pointer
+            attempt to allocate your maximal allocation - it should work
+            free it*/
+    
+    printf("===================================================================================\nTest 2\n");
 
-    printf("Test 1: This test is where we malloc 1 byte, and then free it. We do this 120 times. We repeated this 50 times as expressed in the instructions.\n");
-    printf("On average, it took about %Lf microseconds to complete this test: \n\n\n", averageTimeTaken);
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
+    //Test 2 works, just got to fix Test 1.
+    /*
+    int *ptr = malloc(allocated/2);
+    int *ptr2 = malloc(allocated/4);
 
+    free(ptr);
+    free(ptr2);
 
+    int *ptr3 = malloc(allocated);
+    free(ptr3);
+    */
+    freeAll();
 
-    // Test 2: Use Malloc to get 120, 1 byte chunks, store the pointers in an array, then use free to deallocate those chunks. Repeat this test 50 times.
-    // ============================================================================================================
-    gettimeofday(&start, NULL);
+    /*3. Saturation:
+            allocate 1B
+            continue allocation 1B until malloc responds with NULL, that is your maximal number of allocations*/
 
-    for(int i = 0; i<50; i++){
-        char *test1 = malloc(120);
+    printf("===================================================================================\nTest 3\n");
 
-        if (test1 == NULL) {
-            perror("Malloc Returned NULL. Please see error message above. Program is exiting...");
-            exit(1);
-        }
-
-        char *test2[120];
-
-        for (int j = 0; j<120; j++){
-            test2[j] = &test1[j];
-        }
-
-		unusedFunction(test2); // This function was made to supress the unused variable warning in the -Wextra flag we are compiling with. Please ignore this. 
-
-        free(test1);
+    char *test3[100];
+    int i = 0;
+    while(i < 100){
+        test3[i] = malloc(1);
+        i++;
     }
-	
-    gettimeofday(&end, NULL);
+    printf("i = %d\n", i);
+    freeAll();
 
-    averageTimeTaken = (((long double) end.tv_usec) - ((long double) start.tv_usec)) / 50.0;
+    /*4. Time Overhead:
+            saturate your memory with 1B allocations (i.e. immediately after test 3)
+            free the last 1B block
+            get the current time
+            allocate 1B
+            get the current time, compute the elapsed time, that is your max time overhead*/
+    
+    printf("===================================================================================\nTest 4\n");
 
-    printf("Test 2: This test is where we malloc 120, 1 byte chunks, and store the corresponding pointer returned in a separate array that we statically define. We repeated this 50 times as expressed in the instructions.\n");
-    printf("On average, it took about %Lf microseconds to complete this test (this includes the calls to unusedFunction() that was made to supress unused variable warnings in this test): \n\n\n", averageTimeTaken);
+    clock_t start, end;
 
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
+    int *test4[100];
 
-
-
-
-
-    // Test 3: Randomly choose between allocating a 1-byte chunk and storing it in an array and deallocating one of the chunks in the array if any exist. Repeat until
-    //         malloc was called 120 times, then free all remaining allocated chunks. Repeat this test 50 times.
-    // ============================================================================================================
-    //gettimeofday(&start, NULL);
-
-    int malloc_called = 0;
-    void *pointerArr[120]; // Pointer Array
-
-    for (int x = 0; x < 50; x++) {
-        while (malloc_called < 120) {
-            int randomNum = rand() % 2;
-
-            if (randomNum == 0) {
-                char *chunk = malloc(1);
-
-                if (chunk == NULL) {
-                    perror("Malloc Returned NULL. Please see error message above. Program is exiting...");
-                    exit(1);
-                }
-
-                pointerArr[malloc_called] = chunk; // Store the pointer that malloc returned, in the pointer array.
-                malloc_called++;
-                continue;
-            } else { // Otherwise, we randomly free one of the chunks as specified in one of the test cases.
-                for (int y = 0; y < malloc_called && pointerArr[y] != NULL; y++) { // If there is something to actually deallocate, hence the condition.
-                    free(pointerArr[y]);
-                    pointerArr[y] = NULL;
-                }
-            }
-        }
-
-        for (int z = 0; z < malloc_called; z++) { // This loop frees everything else in the array.
-            if (pointerArr[z] != NULL) {
-                free(pointerArr[z]);
-            }
-        }
-
-        malloc_called = 0;
+    for(int i = 0; i < 100; i++){
+        test4[i] = malloc(1);
     }
+    free(test4[99]);
 
-    gettimeofday(&end, NULL);
+    start = clock();
+    test4[99] = malloc(1);
+    end = clock();
 
-    averageTimeTaken = (((long double) end.tv_usec) - ((long double) start.tv_usec)) / 50.0;
+    double duration = (double)(end-start) / CLOCKS_PER_SEC;
+    printf("max time overhead: %f seconds\n", duration);
 
-    printf("Test 3: This test is where we randomly choose between allocating a 1-byte chunk and storing the pointer in an array OR deallocating one of the chunks in the aforementioned array, if any exist. We repeated this 50 times as expressed in the instructions.\n");
-    printf("On average, it took about %Lf microseconds to complete this test. \n\n\n", averageTimeTaken);
+    /*5. Intermediate Coalescence
+            saturate your memory with 1B allocations (i.e. immediately after test 4)
+            free each one, one by one
+            attempt to allocate your maximal allocation - it should work
+            free all memory*/
 
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
-
-
-    // Test 4: Create a randomly sized array n, with integers. This n-sized array will be between size 1 and size 120. Then, fill this array up with integers between 0 and n. Free the entire array.
-    //         Repeat this 50 times.
-    // ============================================================================================================
-
-    gettimeofday(&start, NULL);
-
-    for (int i = 0; i < 50; i++) {
-        int *array = (int *) malloc (120 * sizeof(int)); // Make Array of size 120.
-
-        if (array == NULL) {
-            perror("Malloc Returned NULL. Please see error message above. Program is exiting...");
-            exit(1);
-        }
-
-        for (int j = 0; j < 120; j++) { // fill array with items
-            array[j] = j;
-        }
-
-        free(array);
-    }
-
-    gettimeofday(&end, NULL);
-
-    averageTimeTaken = (((long double) end.tv_usec) - ((long double) start.tv_usec)) / 50.0;
-    printf("Test 4: This test is where we created an array of size 120 and filled it with integers followed by freeing it.\n");
-    printf("This test is repeated 50 times as expressed in the instructions.\n");
-    printf("On average, it took %Lf microseconds for each of these tasks to complete.\n\n\n", averageTimeTaken);
-
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
-
-
-    // Test 5: Create a 10x12 2D Array. Fill it up with random integers.
-    //         Repeat this 50 times.
-    // ============================================================================================================
-
-    gettimeofday(&start, NULL);
-
-    for (int x = 0; x < 50; x++) {
-        int **array = (int **) malloc(10 * sizeof(int *)); // Allocate rows of the array.
-
-        for (int y = 0; y < 10; y++) {
-            array[y] = (int *) malloc(12 * sizeof(int)); // Allocate columns of the array.
-        }
-
-        for (int r = 0; r < 10; r++) {
-            for (int c = 0; c < 12; c++) {
-                array[r][c] = rand() % RAND_MAX; // Fill it up with random integers.
-            }
-        }
-
-        for (int i = 0; i < 10; i++) {
-            free(array[i]); // Free everything.
-        }
-
-        free(array); // Free array.
-    } // Repeat this 50 times.
-
-    gettimeofday(&end, NULL);
-
-    averageTimeTaken = (((long double) end.tv_usec) - ((long double) start.tv_usec)) / 50.0;
-    printf("Test 5: This test is where we created a 2D array and filled it with random integers between 0 and RAND_MAX.\n");
-    printf("This test is repeated 50 times as expressed in the instructions.\n");
-    printf("On average, it took %Lf microseconds for each of these tasks to complete.\n\n", averageTimeTaken);
-
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
-    // ============================================================================================================
-
+    
     return 0;
 }
