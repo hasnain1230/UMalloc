@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "errors.h"
 #include "umalloc.h"
 
@@ -119,19 +120,19 @@ void *umalloc(size_t size, char *file, int line) {
         struct metaData *md = (struct metaData *) &memory[x];
 
         if (md->available == TRUE && md->dataSize >= size) { // Found a block big enough.
-            // FIXME: Ask Professor: Do we need to memmove? This makes fragmentation a little harder.
-            // FIXME: Clean up the code around here. It is a little messy.
-
-            // Move the metadata to the right of the allocated memory to the right of the allocated memory.
-            memmove(&memory[x + sizeof(struct metaData) + size], &memory[x + sizeof(struct metaData) + md->dataSize], MEMSIZE - (x + sizeof(struct metaData) + md->dataSize));
-
-            md->dataSize = size;
-            md->available = FALSE;
-
             unsigned int nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
+            md->available = FALSE;
+            bool hasNextMetaData = ((struct metaData *) (&memory[x + sizeof(struct metaData) + md->dataSize]))->available == TRUE || ((struct metaData *) (&memory[x + sizeof(struct metaData) + md->dataSize]))->available == FALSE;
+
+            if (!hasNextMetaData) {
+                md->dataSize = size;
+                nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
+            }
+
+
             md = (struct metaData *) &memory[nextMDIndex]; // The next metaData that is or may need to be stored to the right of this currently allocated chunk.
 
-            if (md->available != TRUE && md->available != FALSE && md->available == 0) { // This means that there is no metaData to the right, and we need to allocate it. If there is metaData to the right, we do not need to worry about.
+            if (md->available != TRUE && md->available != FALSE) { // This means that there is no metaData to the right, and we need to allocate it. If there is metaData to the right, we do not need to worry about.
                 if (nextMDIndex + sizeof(struct metaData) <= MEMSIZE) { // If there is actually enough space to store this new metaData
                     md->available = TRUE;
                     md->dataSize = MEMSIZE - (x + (3 * sizeof(struct metaData)) + size); // How much memory there is left to allocate. Here, we are accounting for three metaData structs. The one made by user, the one storing how much data is left over, and space for the next metaData that will be stored on the next malloc call.
