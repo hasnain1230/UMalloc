@@ -4,7 +4,6 @@
 #include <sys/time.h>
 #include "umalloc.h"
 
-// LINE 123 UMALLOC , there was an error occuring and I changed it to this and everything was working correctly
 
 
 
@@ -194,7 +193,7 @@ int main() {
     if (test1_success) {
         printf("Test Case #1: Maximization\n");
         printf("Instructions: Allocate 1B, if the result is not NULL then free it, double the size and try again. On NULL, havlve the size and try again. On success after a NULL, stop.\n");
-        printf("Results: Success. Max Allocation Size = %d\n",max_allocation_size);
+        printf("Results: Success. Max Allocation Size = %d B\n",max_allocation_size);
         printf("------------------------------------------------------------------------------------\n");     
     }
 
