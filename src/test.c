@@ -7,5 +7,13 @@
 #include "umalloc.h"
 
 int main() {
-    return 0;
+    int *x = malloc(4);
+    int *y = malloc(4);
+    *y = 2;
+
+    free(x);
+    short *z = malloc(2);
+
+    printMemory(128);
+    printf("%d\n", *y);
 }
