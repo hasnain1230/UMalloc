@@ -1,19 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-
+#include <time.h>
+#include <sys/time.h>
 #include "umalloc.h"
 
 int main() {
-    int *x = malloc(4);
-    int *y = malloc(4);
-    *y = 2;
+    size_t x = 1;
+    size_t totalAllocated = 0;
+    char *test1 = malloc(x);
 
-    free(x);
-    short *z = malloc(2);
+    while (test1 != NULL) {
+        free(test1);
+        test1 = malloc(x * 2);
 
-    printMemory(128);
-    printf("%d\n", *y);
+        if (test1 != NULL) {
+            x *= 2;
+        }
+    }
+
+    while (1) {
+        test1 = malloc(x);
+
+        if (test1 == NULL) {
+            if (x == 1 || x == 0) {
+                break;
+            }
+            x /= 2;
+        } else {
+            totalAllocated += x;
+        }
+    }
+
+    while (1) {
+        test1 = malloc(x);
+
+        if (test1 != NULL) {
+            totalAllocated += x;
+            continue;
+        } else if (test1 == NULL) {
+            if (x == 1) {
+                break;
+            }
+            x /= 2;
+        }
+    }
+
+    printf("Total Allocated: %zu\n", totalAllocated);
+
+    return 0;
 }

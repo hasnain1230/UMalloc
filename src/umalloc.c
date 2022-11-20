@@ -13,7 +13,7 @@
 #define FALSE 70
 
 static char memory[MEMSIZE]; // Assuming that everything in the char array is 0.
-
+size_t currentMemAreaLeft = 0;
 /*
  * For metaData, available is set to type char to represent boolean values of true or false. These will ALWAYS be either
  * set to upper case ASCII 'T' (84 decimal value) or upper case ASCII 'F' (70 decimal value). These values will represent
@@ -31,7 +31,7 @@ static char memory[MEMSIZE]; // Assuming that everything in the char array is 0.
 
 struct metaData {
     char available; // In this case, available will either be set as T or F for true or false.
-    unsigned int dataSize; // We did not use size_t here to save space in the long run. Rather than having a 16 byte alignment, doing unsigned int makes it 8 byte aligned which will save space. I think it is safe to assume that the user will not be allocating more than 4 GB of memory all at once should the memory be 2^32 bytes large.
+    int dataSize; // We did not use size_t here to save space in the long run. Rather than having a 16 byte alignment, doing unsigned int makes it 8 byte aligned which will save space. I think it is safe to assume that the user will not be allocating more than 4 GB of memory all at once should the memory be 2^32 bytes large.
 };
 
 void printMemory(int bytes) { // This function was created for debugging purposes. The user may call this if they may to view "bytes" number of bytes in the memory array. This function is only intended to be used for debugging purposes.
@@ -57,13 +57,13 @@ void *initializeMemory(size_t size) {
     struct metaData *md = (struct metaData *) memory; // md's actual contents gets written to the same place where memory is stored. It starts writing at the address of memory[0]
 
     md->available = FALSE;
-    md->dataSize = size;
+    md->dataSize = (int) size;
 
     md = (struct metaData *) &memory[sizeof(struct metaData) + md->dataSize]; // Have md point to basically after the metadata and allocated memory given to the user.
 
     md->available = TRUE;
     md->dataSize = MEMSIZE - (sizeof(struct metaData) * 3) - size; // How much memory there is left to allocate. Here, we are accounting for three metaData structs. The one made by user, the one storing how much data is left over, and space for the next metaData that will be stored on the next malloc call.
-
+    currentMemAreaLeft = md->dataSize;
     return memory + sizeof(struct metaData); // Return pointer to first allocated memory.
 }
 
@@ -119,13 +119,19 @@ void *umalloc(size_t size, char *file, int line) {
     while (x < MEMSIZE) { // Iterate through memory to look for a block big enough for size.
         struct metaData *md = (struct metaData *) &memory[x];
 
-        if (md->available == TRUE && md->dataSize >= size) { // Found a block big enough.
+        if (md->available == TRUE && md->dataSize >= (int) size) { // Found a block big enough.
             unsigned int nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
             md->available = FALSE;
-            bool hasNextMetaData = ((struct metaData *) (&memory[x + sizeof(struct metaData) + md->dataSize]))->available == TRUE || ((struct metaData *) (&memory[x + sizeof(struct metaData) + md->dataSize]))->available == FALSE;
+
+            if (nextMDIndex > MEMSIZE) {
+                printf("%u\n", nextMDIndex);
+                exit(2);
+            }
+
+            bool hasNextMetaData = ((struct metaData *) (&memory[nextMDIndex]))->available == TRUE || ((struct metaData *) (&memory[nextMDIndex]))->available == FALSE;
 
             if (!hasNextMetaData) {
-                md->dataSize = size;
+                md->dataSize = (int) size;
                 nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
             }
 
@@ -136,6 +142,7 @@ void *umalloc(size_t size, char *file, int line) {
                 if (nextMDIndex + sizeof(struct metaData) <= MEMSIZE) { // If there is actually enough space to store this new metaData
                     md->available = TRUE;
                     md->dataSize = MEMSIZE - (x + (3 * sizeof(struct metaData)) + size); // How much memory there is left to allocate. Here, we are accounting for three metaData structs. The one made by user, the one storing how much data is left over, and space for the next metaData that will be stored on the next malloc call.
+                    currentMemAreaLeft = md->dataSize;
                 } else {
                     noMoreMem(file, line);
                     return NULL;
@@ -144,6 +151,9 @@ void *umalloc(size_t size, char *file, int line) {
 
             return &memory[x] + sizeof(struct metaData);
         } else {
+            if (md->dataSize <= 0) {
+                break;
+            }
             x += sizeof(struct metaData) + md->dataSize; // Iterate through array.
             continue;
         }

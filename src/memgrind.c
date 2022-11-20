@@ -4,11 +4,6 @@
 #include <sys/time.h>
 #include "umalloc.h"
 
-void unusedFunction(char **arr) { // This is done to supress unused variable error provided in the -Wextra flag that we are using.
-	arr = arr;
-	return;
-}
-
 int main() {
     srand(time(0));
     
