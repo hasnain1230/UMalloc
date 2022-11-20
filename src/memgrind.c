@@ -50,31 +50,38 @@ int main() {
     int allocated = 0;
     int size = 1;
     
-
+    //start off allocating 1 byte
     p = malloc(size);
     allocated = allocated + size;
+    printf("size = %d\n", size);
 
+    //now start doubling the size to be allocated
     while(p != NULL){
         free(p);
         size = size*2;
-        // printf("size: %d\n", size);
+        printf("size: %d\n", size);
         p = malloc(size);
+        //if malloc is a success, then update the number of allocated bytes
         allocated = allocated + size;
-        // printf("allocated = %d\n", allocated);
     }
+    
+    //need to subtract the current size since malloc returned NULL for that size
+    allocated = allocated - size; 
+    printf("allocated = %d\n", allocated);
 
-    //not sure if this is right, but once you hit NULL, then keep dividing the size
+    //once malloc reaches NULL, divide size by half
+    size = size/2;
 
     while(1){
-        size = size/2;
-        if(size == 0 || size == 1){
-            allocated = allocated + size;
-            break;
+        printf("size: %d\n", size);
+        p = malloc(size);
+        if(p == NULL){
+            size = size/2;  //if we reach NULL again, divide size by half
+            if(size == 0 || size == 1){
+                break;  //once size is 0 or 1 we break out of the loop
+            }
         }else{
-            // printf("size: %d\n", size);
-            p = malloc(size);
-            allocated = allocated + size;
-            free(p);
+            allocated = allocated + size;   //if p isn't NULL increment count of allocated
         }
     }
 
@@ -91,17 +98,29 @@ int main() {
     
     printf("===================================================================================\nTest 2\n");
 
-    //Test 2 works, just got to fix Test 1.
-    /*
-    int *ptr = malloc(allocated/2);
-    int *ptr2 = malloc(allocated/4);
+    printf("max allocation: %d\n", allocated);
+    int half = allocated/2;
+    int quarter = allocated/4;
+
+    int *ptr = malloc(half);
+    if(ptr == NULL){
+        printf("ptr failed\n");
+    }
+
+    int *ptr2 = malloc(quarter);
+    if(ptr2 == NULL){
+        printf("ptr2 failed\n");
+    }
 
     free(ptr);
     free(ptr2);
 
     int *ptr3 = malloc(allocated);
+    if(ptr3 == NULL){
+        printf("ptr3 failed\n");
+    }
     free(ptr3);
-    */
+
     freeAll();
 
     /*3. Saturation:
