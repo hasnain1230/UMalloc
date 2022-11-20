@@ -47,5 +47,7 @@ int main() {
 
     printf("Total Allocated: %zu\n", totalAllocated);
 
+    freeAll();
+
     return 0;
 }

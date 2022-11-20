@@ -77,8 +77,13 @@ void coalesceBlocks() {
     int x = 0;
     while (x < MEMSIZE) {
         struct metaData *firstMetaData = (struct metaData *) &memory[x];
+        if (firstMetaData->dataSize <= 0) {
+            return;
+        }
 
-        int nextMDLocation = x + sizeof(struct metaData) + firstMetaData->dataSize; // The location of the next metaData in the array.
+        int nextMDLocation = (int) (x + sizeof(struct metaData) + firstMetaData->dataSize); // The location of the next metaData in the array.
+
+
 
         if (nextMDLocation + sizeof(struct metaData) > MEMSIZE) { // If we are at the last piece of metaData and there is nothing else to the right. Nothing to allocate.
             return;
@@ -86,8 +91,12 @@ void coalesceBlocks() {
 
         struct metaData *secondMetaData = (struct metaData *) &memory[nextMDLocation];
 
+        if (secondMetaData->dataSize <= 0) {
+            return;
+        }
+
         if (firstMetaData->available == TRUE && secondMetaData->available == TRUE) {
-            firstMetaData->dataSize += (secondMetaData->dataSize + sizeof(struct metaData)); // Combine the two blocks, the data they have allocated, and one of their metaDatas.
+            firstMetaData->dataSize += (int) (secondMetaData->dataSize + sizeof(struct metaData)); // Combine the two blocks, the data they have allocated, and one of their metaDatas.
             continue;
         }
 
@@ -201,6 +210,10 @@ void freeAll() {
     struct metaData *md;
     for (int x = 0; x < MEMSIZE; x += sizeof(struct metaData *) + md->dataSize) {
         md = (struct metaData *) &memory[x];
+        if (md->dataSize <= 0) {
+            break;
+        }
+
         if (md->available == FALSE) {
             free(&memory[x + sizeof(struct metaData)]);
         }
