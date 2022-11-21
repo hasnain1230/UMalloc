@@ -17,7 +17,7 @@ void tooMuchMem(int MEMSIZE, char* file, int line, size_t structSize) { //client
 }
 
 void noMoreMem(char* file, int line){ //client requested more memory but there is no longer enough free space to allocate mem, same as heap buffer overflow
-    printf("Malloc was unable to find a block big enough for your call. [ %s:%d ]\n", file, line);
+    printf("\nMalloc was unable to find a block big enough for your call. [ %s:%d ]\n", file, line);
     return;
 }
 
