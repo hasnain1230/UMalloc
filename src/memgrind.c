@@ -57,8 +57,6 @@ int main() {
             test2[j] = &test1[j];
         }
 
-		unusedFunction(test2); // This function was made to supress the unused variable warning in the -Wextra flag we are compiling with. Please ignore this. 
-
         free(test1);
     }
 	
