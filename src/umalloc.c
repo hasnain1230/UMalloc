@@ -83,8 +83,6 @@ void coalesceBlocks() {
 
         int nextMDLocation = (int) (x + sizeof(struct metaData) + firstMetaData->dataSize); // The location of the next metaData in the array.
 
-
-
         if (nextMDLocation + sizeof(struct metaData) > MEMSIZE) { // If we are at the last piece of metaData and there is nothing else to the right. Nothing to allocate.
             return;
         }
@@ -99,7 +97,7 @@ void coalesceBlocks() {
             firstMetaData->dataSize += (int) (secondMetaData->dataSize + sizeof(struct metaData)); // Combine the two blocks, the data they have allocated, and one of their metaDatas.
             continue;
         }
-
+        
         x += sizeof(struct metaData) + firstMetaData->dataSize; // Iterate through array based on metaData.
     }
 }
@@ -133,12 +131,12 @@ void *umalloc(size_t size, char *file, int line) {
             if (md->dataSize >= (int) (size + sizeof(struct metaData))) {
                 md->dataSize = (int) size; // Set the size of the block to the size of the data the user wants to allocate.
                 nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
-            } else {
+            } else { // If there is no space for a new metaData, we just use the one currently to the right of the current metaData... Should it exist
                 nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
                 bool hasNextMetaData = ((struct metaData *) (&memory[nextMDIndex]))->available == TRUE || ((struct metaData *) (&memory[nextMDIndex]))->available == FALSE;
 
                 if (!hasNextMetaData) {
-                    md->dataSize = (int) size;
+                    md->dataSize = (int) size; // If there is no metaData...
                     nextMDIndex = x + sizeof(struct metaData) + md->dataSize;
                 }
             }
@@ -199,6 +197,7 @@ void ufree(void *ptr, char *file, int line) {
         exit(1);
     } else {
         md->available = TRUE; // Free the memory and coalesce.
+        currentMemAreaLeft += md->dataSize;
         coalesceBlocks();
     }
 }
@@ -227,4 +226,15 @@ void freeAll() {
     coalesceBlocks();
 
     return;
+}
+
+void freeAllFast() {
+    struct metaData *firstMD = (struct metaData *) memory;
+    firstMD->available = TRUE;
+    firstMD->dataSize = MEMSIZE - (sizeof(struct metaData) * 2);
+
+    firstMD = (struct metaData *) &memory[sizeof(struct metaData) + firstMD->dataSize];
+
+    firstMD->available = TRUE;
+    firstMD->dataSize = 0;
 }

@@ -12,5 +12,6 @@ void *umalloc(size_t size, char *file, int line);
 void ufree(void *ptr, char *file, int line);
 void freeAll();
 void printMemory(int bytes);
+void freeAllFast();
 
 #endif

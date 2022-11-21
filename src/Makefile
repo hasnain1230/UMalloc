@@ -1,6 +1,6 @@
-TARGET = test
+TARGET = memgrind
 CC = gcc
-CFLAGS = -g -std=c99 -Wall -Wvla -Wextra -Wundef -Wshadow -Wpointer-arith -fsanitize=address
+CFLAGS = -g -std=c99 -Wall -Wvla -Wextra -Wundef -Wshadow -Wpointer-arith -O3 -fsanitize=address
 OBJ = umalloc.o $(TARGET).o errors.o
 
 all: $(TARGET)
