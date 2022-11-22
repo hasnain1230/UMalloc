@@ -4,7 +4,9 @@
 #include <sys/time.h>
 #include "umalloc.h"
 
+#ifndef LONG_TEST
 #define LONG_TEST 0
+#endif
 
 int main() {
     int test0_success = 0;
@@ -143,7 +145,7 @@ int main() {
 
     // ---------------------------------------------------------------------------
     // Test 4: Time Overhead
-    // Saturate your memory with 1B allocations (immediately from Test 3)
+    // Saturate your mem with 1B allocations (immediately from Test 3)
     // Free the last 1B block
     // Get the current time
     // Allocate 1B
@@ -161,10 +163,10 @@ int main() {
 
     // ---------------------------------------------------------------------------
     // Test 5: Intermediate Coalescence
-    // Saturate your memory with 1B allocations
+    // Saturate your mem with 1B allocations
     // Free each one, one by one
     // Attempt to allocate your maximal allocation - it should work
-    // Free all memory
+    // Free all mem
     for(int i  = 0; i < number_of_pointers ; i++) {
         free(pointer_array[i]);
     }
@@ -212,14 +214,14 @@ int main() {
 
     if (test4_success) {
         printf("Test 4: Time Overhead\n");
-        printf("Instructions: Saturate your memory (immediately after Test 3), free the last 1B block, get the current time, allocate 1B block and get the current time. Compute the elapsed time, that is your max time overhead\n");
+        printf("Instructions: Saturate your mem (immediately after Test 3), free the last 1B block, get the current time, allocate 1B block and get the current time. Compute the elapsed time, that is your max time overhead\n");
         printf("Results: Max Time Overhead = %Lf ns\n",timeTaken);
         printf("------------------------------------------------------------------------------------\n");
     }
 
     if (test5_success) {
         printf("Test 5: Intermediate Overhead\n");
-        printf("Instructions: Saturate your memory (i.e. immediately after Test 4), free each allocation and attempt to allocate your maximal allocation size. Then free all memory.\n");
+        printf("Instructions: Saturate your mem (i.e. immediately after Test 4), free each allocation and attempt to allocate your maximal allocation size. Then free all mem.\n");
         printf("Results: Memory was saturated, then each pointer was freed one by one and the maximal allocation was successfully allocated\n");
         printf("------------------------------------------------------------------------------------\n");
     }
@@ -231,10 +233,10 @@ int main() {
         puts("\n\nPlease Note: The long test macro is defined. It will probably take close to 1500 seconds (30 minutes) to complete depending on the hardware.\n");
         printf("Allocating 1 Byte Chunks...\n\n");
         for (char *c = malloc(1); c != NULL; c = malloc(1)) {
-            printf("Percentage of memory that has been allocated is %lf%%\r", (double) (1.00 - (double) currentMemAreaLeft / MEMSIZE) * 100.0);
+            printf("Percentage of mem that has been allocated is %lf%%\r", (double) (1.00 - (double) currentMemAreaLeft / MEMSIZE) * 100.0);
         }
 
-        puts("Percentage of memory that has been allocated is 100%");
+        puts("Percentage of mem that has been allocated is 100%");
 
         freeAllFast();
     }
