@@ -109,8 +109,7 @@ the tests that we wrote in `memgrind` were provided in the assignment instructio
 6. Complete Saturation:
    - This test simply allocates the entire mem with 1 byte `char` allocations. We then call `freeAllFast` which frees the entire mem in constant time (we just set the first metadata to free the entire mem).
    - Once the entire mem is full, we free the entire mem.
-   - By default, this test is disabled. To run it, please set the `LONG_TEST` variable in the Makefile to `1` and recompile. Please note, this test can take anywhere from 1200 to 2500 seconds. Hence, we have disabled it
-   by default. 
+   - By default, this test is disabled. To run it, please compile using `make long_test` and then run `./memgrind`.
 
 
 ## Design Properties 
