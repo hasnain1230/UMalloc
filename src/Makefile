@@ -1,3 +1,8 @@
+# Hasnain Ali (ha430)
+# Rushabh Patel (rsp155)
+# Della Maret (dm1379)
+# iLab Machine Tested On: ilab.cs.rutgers.edu and rlab1.cs.rutgers.edu
+
 TARGET = memgrind
 CC = gcc
 CFLAGS = -g -std=c99 -Wall -Wvla -Wextra -Wundef -Wshadow -Wpointer-arith -O3 -fsanitize=address

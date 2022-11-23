@@ -1,3 +1,10 @@
+/*
+ * Hasnain Ali (ha430)
+ * Rushabh Patel (rsp155)
+ * Della Maret (dm1379)
+ * iLab Machine Tested On: ilab.cs.rutgers.edu and rlab1.cs.rutgers.edu
+ */
+
 #include <stdio.h>
 #include "errors.h"
 
