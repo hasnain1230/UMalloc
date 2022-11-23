@@ -9,7 +9,6 @@ all: $(TARGET)
 
 long_test:
 	$(MAKE) LONG_TEST=1
-	$(MAKE) $(TARGET)
 
 run: $(TARGET)
 	./$<
